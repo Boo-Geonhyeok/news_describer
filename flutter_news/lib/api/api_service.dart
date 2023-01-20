@@ -1,15 +1,9 @@
-import 'dart:io';
+import 'dart:convert';
 
-import 'package:flutter_chatgpt_api/flutter_chatgpt_api.dart';
+import 'package:http/http.dart' as http;
 import 'package:pocketbase/pocketbase.dart';
 
 final pb = PocketBase('http://127.0.0.1:8090');
-final _api = ChatGPTApi(
-  sessionToken:
-      "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..LoSw-nEgp-qsuqRD.hIF_ENKBhL76jQCBgctJ-sm48EUBfQURT-KetKxZVh8lf0ATy90jGoh4Z-U-6aVnhC1hSREkHDbGXtoPxUp5ICiy_v9V7HUsgEx_K2dHaaawQgFDX5DumtQcdjDjmJSyzkGRCY8mMYOBBtt56sbCTpsq2B8lpDBBC4JnBF4PzxUWLFCbu4jWd7wAaFa1AwPr-1V9NM5adbyTGd6O6sU5sHvm0rBwbl0AakomsnyHEHpW-eqGwoNMCDRuq5ZOPL33Q7CKul9OCHxIA2bh669MEu1gsxufcoVYRduUrlHqHGesJlNMNuJI0fRPRBaeqJj3YHywIwSC5laTMv2p_sw4b6oc961lzeeyLahWhOunHDeW7TKjB3gHWwRQvxEQUYTwRrZrPewsJgxl1oC3z3Po35lhzNwI1e0yUSA-tg84KiemR_o7MbwL6O2K9qebAPvWqCTJ8n_By-owNb2dfhTlgRBOnfA3Zt4f-sskxNgpPEtnKqfGbNObovMss4Ym_wlVvV_mxaMUNgJYWJG5ewBQ-ppK1MbOPpItRwFzzb59oqBYg_MMKxbsnsv3-EzAqeLLK6KE1qkd6lL-urON8YKqktjSz96e5yyZYpi24Gw94F-9vzTqYIIgqWuvyHY9Y1FcStFkGbVD7WIShkbV9acpt6fdzaAvNIW8qIeMtNmZUqGfavxaMtQkc8WjUz5C9M7hCCTgL2PTTNC3sGB6rvJv3IOgwWGeG_oqQNOg_OYCQEVb71ikJ5ijaDa6olvE0pw7cmHVlIY0ihh_S40S83RVeXNiMZHvyawMhysO4ejnMvGkjdT908Gr3wRzwloTtEeO3a02Y44v26RPqbhq4rEr5kLs-r8sUFCvH9Qk1UblL7muhEaviMTHGol3nR1oBhn5oZMjmoocXDDuO8oxXTetGmJ75x8dYUcQRkRBrXjIZbrlL8Jguj3E7zNHoGlUGrl_zejgWXq7KKf54AipwABWscrnW-p9PyWB0bT4evaEiyF033Bp4V2ZdDiFk1Ksogaaj-0gGSIcv6f5ZDHR5Je7rK2QW0SwhzpqmGHtDfs67vsk4QPgabo-HVR0nEJ5BviJARNa34SwO6SSrfaJZroRHhYNxI7t6D2vPZmFXyAPEGyKpNniZCHtuMU_MAtS3C49gAlLV81PiAxd7cdQ2kLpj5IrGJlUnd7Tt2kJB3JBgZFlUkdRaDAlAah0SLLrLKR2v2jLJqxpRowyppCWbDSpblXzbSZVg7IQu03qFn18IesMcKo9A0SUVLvry9eHckk_bMBjT-4pKRuwll2JyOtawwjR21aOhZ2ALkweiDqM2kUoLtI9nvKbnKiN3rCV8mYOaO6qyKhdO-uCbZLACFrNPo2SxD4XvLQjpqL6Y17EDwoll3uJIe3kRV98D6avYMDJMLw8D1X9wcn22BS7iN3ATJpRDvRBTauvIUNREutw8p9UiTiDv9q4z0M6BCTwKqKsHwCiPXjw8HyDCtpSrVZAcxeZlgquH4udHYCjTJN7ouq8FE-xhqnVjfzO31AXNTuuL9TeweSe9dKHwSIDCOqHJxhdgf_wAAVZDPoN6Yq5TZUDoNdT8QCmVjKxs144_juDk5oSedOaxXCY8430Djytd8zDU2AQasglzgH8XgnXFAW1Fsk8Trz6bz2jUeW01ajUFlouKMuAmfhCI00aoOGHnZ7ZfsFXwXBUwLCksj9nBn-HM1ZuVBVEKDFwUJF8YzEKdnYKc77fVgChugITbgPRrsgKggKWslwQB-Xkpd1z8jLgQWLBhsC9p3DzrUlLid-a4gojkWlLK3XyzZnf9QZnDD3qgvk6eq6r4CpjEQ25DDW0T075Ymf6bM4dZQ13x-DrkrAM3V_dHA6pZ3jpV46twTpv3jTm3lI5PnxtWZ89UL2pCuBpwViNpxY7hU_Pu_Kb5QYW9BcuUNc_quKcrkCqqPL_rvA2mAdKkhalmnoY09G6OXr3CYY63CY69w74G401dZQ185VEv9nu32Ai0BWTv4IztDUmuvidUXYRhIZB_tFvLdJ98xnk3Bb1kPlg2f0r5Ll-6MRfqzUnhU7JWpwiZAVmKQisdbgqY4Z2GzR-dSHO7HTxEHZIS1H24gnvu2qww7mKEp_7YcGYDhvo_E__XiTat-s8fEB49GFaNn-AMDBYNqvz3cJKhQgc_V-CxGRv2ARRPtewHlFBXaIhtXbHt22uY9uHTYb35GLLYFncV9soGeZd-rGusyOnC1Sasgjv7uYZpmyimGRVbkfBRx9dNgo.HOm27dVeApJa0VZtbXGffA",
-  clearanceToken:
-      "FIRNoC6gLMKgTn..wHquZm_OWJ3jXAOoTphBGhd.flg-1674031984-0-1-8094dbdd.aa799676.d795843d-160",
-);
 
 class ApiService {
   static Future<List<RecordModel>> getNews() async {
@@ -21,12 +15,27 @@ class ApiService {
   }
 
   static Future<String> getDescription(String article) async {
-    var result = await Process.run("/opt/homebrew/bin/python3", [
-      "/Users/ghboo/go/src/github.com/Boo-Geonhyeok/news/python_summarization/summarization.py",
-      article,
-    ]);
-    print(result.stderr);
-    print(result.stdout);
-    return result.stdout.toString();
+    const apiKey = '3eebcba957d32a3fc8107990ad22531b';
+    const url =
+        'https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1';
+
+    if (article != "") {
+      var response = await http.post(Uri.parse(url),
+          body: jsonEncode(<String, dynamic>{
+            "language": "english",
+            "summary_percent": 10,
+            "text": article,
+          }),
+          headers: <String, String>{
+            'content-type': 'application/json',
+            'X-RapidAPI-Key':
+                'da18f18ba0mshf2809c081a0bd98p150885jsn589bed44bafc',
+            'X-RapidAPI-Host': 'text-analysis12.p.rapidapi.com'
+          });
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body)["summary"];
+      }
+    }
+    throw Error();
   }
 }

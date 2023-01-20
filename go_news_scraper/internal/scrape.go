@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"log"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -11,13 +10,12 @@ import (
 )
 
 type News struct {
-	Topic       string
-	Title       string
-	Article     string
-	Description string
-	Date        string
-	Url         string
-	ImgUrl      string
+	Topic   string
+	Title   string
+	Article string
+	Date    string
+	Url     string
+	ImgUrl  string
 }
 
 func ScrapeNews() []News {
@@ -61,7 +59,6 @@ func ScrapeNews() []News {
 		article := h.ChildText("p.ssrcss-1q0x1qg-Paragraph")
 		imgUrl := h.ChildAttr("img", "src")
 		news.Article = article
-		news.Description = describe(article)
 		news.ImgUrl = imgUrl
 		newsArray = append(newsArray, news)
 	})
@@ -110,13 +107,4 @@ func splitTime(time string) []string {
 	}
 
 	return parts
-}
-
-func describe(article string) string {
-	cmd := exec.Command("/opt/homebrew/bin/python3", "/Users/ghboo/go/src/github.com/Boo-Geonhyeok/news/python_summarization/summarization.py", article)
-	output, err := cmd.Output()
-	if err != nil {
-		fmt.Println(err)
-	}
-	return string(output)
 }

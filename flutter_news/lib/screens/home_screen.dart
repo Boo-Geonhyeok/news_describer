@@ -44,13 +44,17 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: snapshot.data![index].data["description"] != ""
-                          ? Text(
-                              snapshot.data![index].data["description"],
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w500),
-                            )
-                          : const Text(""),
+                      child: FutureBuilder(
+                        future: ApiService.getDescription(
+                            snapshot.data![index].data["article"]),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(snapshot.data!);
+                          } else {
+                            return const CircularProgressIndicator();
+                          }
+                        },
+                      ),
                     ),
                     const SizedBox(
                       height: 30,
