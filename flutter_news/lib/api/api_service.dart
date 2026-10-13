@@ -15,7 +15,7 @@ class ApiService {
   }
 
   static Future<String> getDescription(String article) async {
-    const apiKey = '3eebcba957d32a3fc8107990ad22531b';
+    const apiKey = String.fromEnvironment('RAPIDAPI_KEY');
     const url =
         'https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1';
 
@@ -28,8 +28,7 @@ class ApiService {
           }),
           headers: <String, String>{
             'content-type': 'application/json',
-            'X-RapidAPI-Key':
-                'da18f18ba0mshf2809c081a0bd98p150885jsn589bed44bafc',
+            'X-RapidAPI-Key': apiKey,
             'X-RapidAPI-Host': 'text-analysis12.p.rapidapi.com'
           });
       if (response.statusCode == 200) {
